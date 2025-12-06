@@ -1,0 +1,323 @@
+# Berty Repository - Claude Context File
+
+## Project Overview
+
+**Berty** is an open, secure, offline-first, peer-to-peer and zero trust messaging application built on the Wesh Protocol. This repository is being forked to create **Gratitude**, a privacy-first mutual aid platform.
+
+### Core Characteristics
+- **Technology**: Go backend + React Native frontend
+- **Architecture**: P2P messaging using IPFS, OrbitDB, and BLE
+- **License**: Apache 2.0 / MIT dual license
+- **Status**: Active development, not yet production-ready
+
+## Development Plan Context
+
+This repository is being prepared for a fork called **Gratitude** - a mutual aid community network. The development plan is documented in `docs/BERTY_DEVELOPMENT_PLAN.md`.
+
+### Project Vision (Gratitude)
+Build a privacy-first, peer-to-peer mutual aid platform that enables community members to broadcast needs and offers without central servers, surveillance, or hierarchical gatekeeping.
+
+**Core Principles**:
+- No servers, no surveillance, no central authority
+- Horizontal relationships (no reputation/trust scoring)
+- Dignity-preserving (categorical offers/needs, not hierarchical)
+- Accessible to vulnerable populations
+- Extensible for community-specific AI/matching
+
+### Development Phases
+1. **Phase 1 (Weeks 1-4)**: Foundation & Setup - Fork, setup environment, understand Berty architecture
+2. **Phase 2 (Weeks 5-8)**: Custom Codec Integration - Binary message format (64-75 bytes)
+3. **Phase 3 (Weeks 9-12)**: UI for Offers/Needs - React Native screens
+4. **Phase 4 (Weeks 13-16)**: Local Semantic Matching - Algorithm for matching offers/needs
+5. **Phase 5 (Weeks 17-20)**: Community Testing & Iteration
+6. **Phase 6 (Week 21+)**: Future Expansion - Hardware mesh, advanced matching
+
+## Repository Structure
+
+```
+berty/
+├── go/                          # Go backend code
+│   ├── cmd/                     # Command-line tools
+│   │   ├── berty/              # Main Berty CLI (daemon, mini)
+│   │   ├── rdvp/               # Rendez-vous point server
+│   │   ├── welcomebot/         # Onboarding bot
+│   │   └── testbot/            # Testing bot
+│   ├── pkg/                     # Go packages
+│   │   ├── bertyaccount/       # Account management
+│   │   ├── bertyauth/          # Authentication
+│   │   ├── bertybridge/        # gomobile bindings for React Native
+│   │   ├── bertymessenger/     # Messenger service
+│   │   ├── messengertypes/     # Message type definitions
+│   │   └── [24 total packages]
+│   ├── framework/               # Mobile framework code
+│   └── internal/                # Internal packages
+│
+├── js/                          # React Native frontend
+│   ├── packages/                # JavaScript packages
+│   │   ├── api/                # API definitions
+│   │   ├── components/         # React components (195 files)
+│   │   ├── screens/            # Screen components (181 files)
+│   │   ├── redux/              # Redux state management
+│   │   ├── navigation/         # Navigation setup
+│   │   ├── hooks/              # React hooks
+│   │   ├── contexts/           # React contexts
+│   │   ├── grpc-bridge/        # gRPC bridge to Go backend
+│   │   ├── native-modules/     # Native module bindings
+│   │   └── utils/              # Utility functions
+│   ├── android/                 # Android-specific code
+│   ├── ios/                     # iOS-specific code
+│   └── web/                     # Web platform code
+│
+├── api/                         # Protocol Buffer definitions
+│   ├── accounttypes/           # Account types (.proto)
+│   ├── messengertypes/         # Messenger types (.proto)
+│   ├── directorytypes/         # Directory types (.proto)
+│   ├── pushtypes/              # Push notification types (.proto)
+│   └── bertybridge/            # Bridge types (.proto)
+│
+├── docs/                        # Documentation
+│   ├── BERTY_DEVELOPMENT_PLAN.md  # ⭐ Main development plan for Gratitude fork
+│   ├── architecture/           # Architecture diagrams and ADRs
+│   ├── apis/                   # API documentation
+│   └── protocol/               # Protocol documentation
+│
+├── config/                      # Configuration files
+├── tool/                        # Development tools
+└── berty-bridge-expo/          # Expo bridge implementation
+```
+
+## Key Technologies
+
+### Backend (Go)
+- **Wesh Protocol**: Core P2P protocol (formerly "Berty Protocol")
+- **IPFS**: InterPlanetary File System for peer discovery and content routing
+- **OrbitDB**: Distributed database for group state management
+- **gomobile**: Go mobile bindings for React Native integration
+- **BLE**: Bluetooth Low Energy for local device discovery
+- **mDNS**: Multicast DNS for local network discovery
+- **Tor**: Optional anonymous routing
+
+### Frontend (React Native)
+- **React Native**: Cross-platform mobile framework
+- **Redux**: State management
+- **React Navigation**: Navigation library
+- **TypeScript**: Type-safe JavaScript
+- **gRPC Bridge**: Communication with Go backend via gomobile
+
+### Protocol & Networking
+- **End-to-end encryption**: Default message encryption
+- **Peer-to-peer**: No central servers required
+- **Offline-first**: Works without internet via BLE/mDNS
+- **Group messaging**: OrbitDB-based group state synchronization
+
+## Planned Modifications for Gratitude Fork
+
+### New Backend Components (Go)
+```
+go/pkg/bertyprotocol/codec/
+├── mutual_aid_message.go    # Binary codec (64-75 bytes)
+├── codec_test.go            # Codec tests
+└── validation.go            # Message validation
+```
+
+### New Frontend Components (React Native)
+```
+js/packages/
+├── services/
+│   ├── codec.ts             # TypeScript codec
+│   ├── validation.ts        # Validation logic
+│   └── matching.ts          # Semantic matching algorithm
+├── redux/slices/
+│   └── mutualAid.ts         # Redux state for offers/needs
+├── screens/
+│   ├── OfferListScreen.tsx  # Browse offers
+│   ├── NeedListScreen.tsx   # Browse needs
+│   ├── CreateOfferScreen.tsx
+│   ├── CreateNeedScreen.tsx
+│   ├── DetailScreen.tsx
+│   └── MatchesScreen.tsx
+└── components/
+    ├── OfferCard.tsx
+    ├── NeedCard.tsx
+    └── CategoryIcon.tsx
+```
+
+### New Documentation
+```
+docs/
+├── ARCHITECTURE.md          # System architecture
+├── DEVELOPMENT.md           # Setup instructions
+├── DESIGN.md                # Integration design
+├── CODEC.md                 # Binary format reference
+├── MATCHING.md              # Matching algorithm
+├── ETHICS.md                # Mutual aid philosophy
+├── ROADMAP.md               # Future plans
+└── USER_GUIDE.md            # End-user documentation
+```
+
+## Message Format (Planned)
+
+### Mutual Aid Binary Codec
+- **Size**: 64-75 bytes (fits within BLE 512-byte limit)
+- **Format**: Custom binary serialization
+- **Fields**:
+  - Version (1 byte)
+  - Message Type (1 byte): OFFER (0), NEED (1), MATCH (2)
+  - UNSPSC Code (4 bytes): Product/service category
+  - Start/End Time (8 bytes each): Availability windows
+  - Latitude/Longitude (8 bytes each): Location
+  - Public Key (32 bytes): Ed25519 signature
+  - Optional Fields: Quantity, UOM, floor, room, dietary restrictions
+
+### UNSPSC Categories (Examples)
+```
+50201506  - Fresh produce
+50201507  - Fresh fruits
+50201710  - Prepared meals
+48191503  - Clothing/apparel
+72101505  - Medical supplies (OTC)
+81100000  - Community/social services
+```
+
+## Current Development Status
+
+### Completed
+- ✅ Repository cloned locally
+- ✅ Development environment setup
+- ✅ BLE transport layer simplified (react-native-ble-plx)
+- ✅ Android build working
+
+### In Progress (Phase 1)
+- [ ] Fork Berty repository to `colin-roy-ehri/gratitude`
+- [ ] Study Berty architecture (Wesh Protocol, message pipeline)
+- [ ] Verify baseline Berty functionality
+- [ ] Create initial documentation (ARCHITECTURE.md, DEVELOPMENT.md)
+
+### Upcoming (Phase 2)
+- [ ] Implement binary codec in Go
+- [ ] Extend protocol.proto with MutualAidMessage type
+- [ ] Create TypeScript codec for React Native
+- [ ] Integrate codec into message pipeline
+
+## Important Files to Review
+
+### Backend Entry Points
+- `go/cmd/berty/main.go` - Main CLI entry point
+- `go/pkg/bertybridge/` - Mobile bridge to React Native
+- `go/pkg/bertymessenger/` - Messenger service implementation
+- `api/messengertypes/messengertypes.proto` - Message type definitions
+
+### Frontend Entry Points
+- `js/index.ts` - React Native app entry point
+- `js/packages/redux/` - State management
+- `js/packages/screens/` - UI screens
+- `js/packages/grpc-bridge/` - Go backend communication
+
+### Documentation
+- `README.md` - Main project README
+- `docs/BERTY_DEVELOPMENT_PLAN.md` - ⭐ Complete development plan
+- `docs/architecture/` - Architecture diagrams and decisions
+- `docs/protocol/README.md` - Protocol documentation
+
+## Build & Development
+
+### Backend (Go)
+```bash
+# Build CLI
+cd go
+make
+
+# Run daemon
+go run ./cmd/berty daemon
+
+# Run mini CLI messenger
+go run ./cmd/berty mini
+```
+
+### Frontend (React Native)
+```bash
+cd js
+yarn install
+
+# Android
+yarn android
+
+# iOS
+yarn ios
+```
+
+## Design Constraints & Decisions
+
+### Intentional Design Choices
+1. **No Reputation System**: Prevents "worthy vs unworthy" hierarchies
+2. **No Monetary Exchange**: Prevents commodification
+3. **Categories Only**: Reduces harassment, uses UNSPSC codes
+4. **Local Matching First**: All matching happens on-device
+5. **No Centralized Moderation**: Groups moderate themselves
+
+### Technical Constraints
+1. **BLE Range**: ~100 meters (mitigated with WiFi P2P/internet fallback)
+2. **Message Size**: 512 bytes BLE limit (codec uses 64-75 bytes)
+3. **P2P Groups**: Uses group messaging, not direct messaging
+4. **Multi-Platform**: iOS, Android, Web support via React Native
+
+## Testing Strategy
+
+### Current Testing
+- Unit tests for Go packages
+- Integration tests for message pipeline
+- E2E tests in `js/e2e-tests/`
+
+### Planned Testing (Gratitude)
+- Codec round-trip serialization tests
+- Message validation tests
+- Matching algorithm tests
+- Alpha testing with Free Store community (10-20 users)
+
+## Privacy & Security
+
+### Current Berty Features
+- End-to-end encryption by default
+- No phone number or email required
+- Minimal metadata
+- Works on adversarial networks
+- BLE for offline communication
+
+### Gratitude Additions
+- Location privacy (show distance bands, not exact coordinates)
+- Anonymous by default
+- No tracking or analytics
+- Local-only semantic matching (no cloud AI)
+
+## References
+
+- **Berty Website**: https://berty.tech/
+- **Berty GitHub**: https://github.com/berty/berty
+- **Wesh Protocol Docs**: https://berty.tech/docs/protocol/
+- **UNSPSC Codes**: https://www.unspsc.org/
+- **Mutual Aid Info**: https://www.mutualaidproject.org/
+
+## Development Workflow
+
+1. **Current Phase**: Phase 1 - Foundation & Setup
+2. **Next Steps**:
+   - Fork repository to personal GitHub
+   - Deep dive into Wesh Protocol architecture
+   - Document message serialization/deserialization flow
+   - Verify baseline Berty functionality on devices
+3. **Branching Strategy**:
+   - `main` → stable releases
+   - `develop` → active development
+   - `feature/*` → feature branches
+   - `wip/*` → work-in-progress
+
+## Notes for AI Assistant
+
+- This is a fork-in-progress; respect upstream Berty architecture
+- Focus on minimal, surgical modifications to Berty codebase
+- Prioritize privacy and offline-first design
+- Keep binary message format compact (64-75 bytes)
+- Document all changes thoroughly
+- Test on physical Android devices (BLE requires real hardware)
+- Follow mutual aid principles: no hierarchy, no commodification
+- Maintain compatibility with Berty's existing message pipeline
