@@ -83,10 +83,186 @@ berty/
 │
 ├── config/                      # Configuration files
 ├── tool/                        # Development tools
-└── berty-bridge-expo/          # Expo bridge implementation
+├── berty-bridge-expo/          # Expo bridge implementation
+└── unspsc/                      # ⭐ UNSPSC Classification System for Mutual Aid
+    ├── UNSPSC_QUICK_START.md           # Quick start guide for using UNSPSC files
+    ├── unspsc-for-llms.md              # LLM-optimized context document
+    ├── unspsc-mutual-aid-reference.json # Machine-readable data
+    └── unspsc-types.ts                 # TypeScript types for IDE autocomplete
 ```
 
-## Key Technologies
+## UNSPSC Classification System
+
+The `unspsc/` folder contains a comprehensive classification system for categorizing mutual aid offers and needs using the United Nations Standard Products and Services Code (UNSPSC).
+
+### UNSPSC Files Overview
+
+**Purpose**: Provide a standardized way to classify goods and services in mutual aid messages using 8-digit codes.
+
+**Hierarchy**: `Segment (2 digits) → Family (4 digits) → Class (6 digits) → Commodity (8 digits)`
+
+Example: `50201506`
+- `50` = Food, Beverage & Tobacco Products (Segment)
+- `5020` = Food Products (Family)
+- `502015` = Fresh Fruits & Vegetables (Class)
+- `50201506` = Fresh Vegetables (Commodity)
+
+### File Descriptions
+
+#### 1. `unspsc-types.ts` - TypeScript Types
+**Use for**: IDE autocomplete, type-safe code validation, building UI
+
+```typescript
+import { UNSPSCCode, UNSPSC_CODES, COMMON_CODES, searchCodes } from './unspsc-types'
+
+// Autocomplete: COMMON_CODES.FRESH_VEGETABLES → 50201506
+const offerCode: UNSPSCCode = COMMON_CODES.FRESH_VEGETABLES
+
+// Get description
+const desc = UNSPSC_CODES[offerCode]  // "Fresh vegetables"
+
+// Search for codes
+const results = searchCodes('wheelchair')
+```
+
+**Features**:
+- Type-safe 8-digit UNSPSC codes
+- Complete mapping of codes to descriptions
+- Utility functions: `getSegment()`, `getFamily()`, `getClass()`, `isRestrictedCode()`, `validateCodeForMessageType()`
+- Search functionality
+- Common codes for quick access
+
+#### 2. `unspsc-mutual-aid-reference.json` - Machine-Readable Data
+**Use for**: Backend data processing, API responses, message validation
+
+**Structure**:
+```json
+{
+  "metadata": { "version": "1.0", "last_updated": "2025-12-06" },
+  "segments": {
+    "50": {
+      "name": "Food, Beverage & Tobacco Products",
+      "families": {
+        "5020": {
+          "name": "Food Products",
+          "classes": {
+            "502015": {
+              "name": "Fresh Fruits & Vegetables",
+              "commodities": {
+                "50201506": "Fresh vegetables"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "utilities": {
+    "restricted_segments": ["82", "83", "84", "85", "90"]
+  }
+}
+```
+
+#### 3. `unspsc-for-llms.md` - LLM Context Document
+**Use for**: Claude integration, AI-assisted code selection, natural language processing
+
+**Purpose**: Provide complete UNSPSC context to LLMs for:
+- Interpreting user descriptions and suggesting appropriate codes
+- Validating that codes match user intent
+- Flagging inappropriate professional service codes
+- Teaching the LLM about mutual aid categorization
+
+**Example prompt**:
+```
+User said: "I have extra tomatoes from my garden to share"
+
+Based on the UNSPSC reference:
+→ Segment 50 (Food, Beverage)
+→ Family 5020 (Food Products)
+→ Class 502015 (Fresh Fruits & Vegetables)
+→ Commodity 50201506 (Fresh vegetables)
+```
+
+#### 4. `UNSPSC_QUICK_START.md` - Integration Guide
+**Use for**: Understanding how to use all three files together
+
+**Covers**:
+- Which file to use for different scenarios
+- Integration examples (full flow from user input to BLE transmission)
+- Building code selector UI
+- Validation in message codec
+- Testing the integration
+
+### UNSPSC Segments Included
+
+**Material Goods**:
+- **10**: Animal & Vegetable Products (pet supplies)
+- **25**: Transportation & Storage (bikes, transit passes)
+- **31**: Tools & Hardware
+- **39**: Electrical Equipment (batteries, lights)
+- **43**: Information Technology (computers, phones)
+- **45**: Musical Instruments
+- **46**: Environmental & Weather (fans, heaters)
+- **47**: Arts, Crafts & Hobbies
+- **48**: Sports, Toys & Recreation
+- **49**: Baby & Infant Products
+- **50**: Food, Beverage & Tobacco ⭐ *Most common*
+- **55**: Books, Media & Publishing
+- **60**: Education & Training (school supplies)
+- **72**: Medical Supplies & Personal Care ⭐ *Critical for accessibility*
+
+**Peer Support Services**:
+- **93**: Social Services & Community Support (peer-based only)
+  - Emotional & social support
+  - Practical assistance (childcare, rides, moving help)
+  - Skill sharing & education
+  - Harm reduction & safety
+
+### Restricted Segments (Professional Services)
+
+These codes can **ONLY** appear in REQUEST messages (seeking help), **NEVER** in OFFER messages:
+- **82**: Legal Services
+- **83**: Professional Education
+- **84**: Financial Services
+- **85**: Healthcare Services
+- **90**: Commercial Childcare
+
+**Rationale**: Prevents commodification and maintains peer-to-peer mutual aid principles.
+
+### Most Common Codes
+
+```typescript
+// Food (most frequent)
+50201506 - Fresh vegetables
+50201507 - Fresh fruits
+50201710 - Prepared meals
+50203506 - Non-alcoholic beverages
+
+// Mobility & Accessibility
+72101620 - Wheelchairs (powered)
+72101503 - Wheelchairs (manual)
+72101501 - Canes & walkers
+
+// Peer Support
+93150101 - Peer emotional support
+93150305 - Computer & tech skills teaching
+93150205 - Rides & transportation assistance
+
+// Essentials
+72100106 - First aid kits
+60100101 - School supplies
+49100101 - Diapers
+```
+
+### Integration with Mutual Aid Codec
+
+The UNSPSC codes are embedded in the binary message format:
+- **Field**: UNSPSC Code (4 bytes in binary message)
+- **Format**: 8-digit integer (e.g., `50201506`)
+- **Validation**: Must exist in reference and be appropriate for message type
+- **Display**: Looked up from `UNSPSC_CODES` mapping for human-readable description
+
+### Key Technologies
 
 ### Backend (Go)
 - **Wesh Protocol**: Core P2P protocol (formerly "Berty Protocol")
